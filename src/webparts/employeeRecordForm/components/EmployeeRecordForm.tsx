@@ -34,6 +34,8 @@ let RootUrl = '';
 
 let ProjectMangerEmails='';
 
+let FinalDateofdeactive='';
+
 let FinalStatus='';
 
 let RecordId='';
@@ -1055,13 +1057,24 @@ let FinalDateofresign=month4+'/'+this.state.dtresign.getDate() +'/' +year4;
 
 //Date of Deactivation
 
+if(this.state.dtdeactive!=null)
+{
+
 let date5=this.state.dtdeactive.getDate();
 
 let month5= (this.state.dtdeactive.getMonth()+1);
 
 let year5 =(this.state.dtdeactive.getFullYear());
 
-let FinalDateofdeactive=month5+'/'+this.state.dtdeactive.getDate() +'/' +year5;
+ FinalDateofdeactive=month5+'/'+this.state.dtdeactive.getDate() +'/' +year5;
+}
+
+else
+{
+
+  FinalDateofdeactive=null;
+  
+}
 
 //End
 
@@ -1266,14 +1279,27 @@ else if(this.state.AdminSignPeople==null || this.state.AdminSignPeople=="")
     //End
     
     //Date of Deactivation
+
+if(this.state.dtdeactive!=null)
+{
+
+let date5=this.state.dtdeactive.getDate();
+
+let month5= (this.state.dtdeactive.getMonth()+1);
+
+let year5 =(this.state.dtdeactive.getFullYear());
+
+ FinalDateofdeactive=month5+'/'+this.state.dtdeactive.getDate() +'/' +year5;
+}
+
+else
+{
+
+  FinalDateofdeactive=null;
+  
+}
     
-    let date5=this.state.dtdeactive.getDate();
-    
-    let month5= (this.state.dtdeactive.getMonth()+1);
-    
-    let year5 =(this.state.dtdeactive.getFullYear());
-    
-    let FinalDateofdeactive=month1+'/'+this.state.dtdeactive.getDate() +'/' +year5;
+   
 
 let AdminnewDate = new Date()
 let Admindate = AdminnewDate.getDate();
