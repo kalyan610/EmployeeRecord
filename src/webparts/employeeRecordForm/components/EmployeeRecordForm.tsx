@@ -13,6 +13,8 @@ import Service from './Service';
 
 import { Button,PrimaryButton } from 'office-ui-fabric-react/lib/Button';
 
+import {Icon} from 'office-ui-fabric-react/lib/Icon';
+
 const sectionStackTokens: IStackTokens = { childrenGap: 10 };
 const stackTokens = { childrenGap: 50 };
 const stackStyles: Partial<IStackStyles> = { root: { padding: 10} };
@@ -88,6 +90,9 @@ export interface EmpDetals{
   AdminSignPeople:any;
   Hrcomments:any;
   AdminComments;
+  FileValue:any;
+  disableFileUpload:boolean;
+  AttachmentFiles:any;
   
 
 }
@@ -130,7 +135,10 @@ export default class EmployeeRecordForm extends React.Component<IEmployeeRecordF
       HRsignPeople:[],
       AdminSignPeople:[],
       Hrcomments:null,
-      AdminComments:null
+      AdminComments:null,
+      FileValue:[],
+      disableFileUpload:false,
+      AttachmentFiles:[]
       
 
     };
@@ -154,6 +162,12 @@ export default class EmployeeRecordForm extends React.Component<IEmployeeRecordF
     
   }
 
+  public  removeItemFromDetailFromList()
+  {
+     alert('great');
+
+  }
+
 
   public async getuserrecords()
   {
@@ -161,8 +175,13 @@ export default class EmployeeRecordForm extends React.Component<IEmployeeRecordF
     let myitemId = this.getParam('SID');
     RecordId=myitemId;
     let ItemInfo = await this._service.getItemByID(RecordId);
+    this.setState({AttachmentFiles:ItemInfo.AttachmentFiles})
+
+    console.log(ItemInfo);
 
     if (ItemInfo.Title != '') {
+
+      
 
       this.setState({ EmpName: ItemInfo.EmpName })
 
@@ -261,6 +280,7 @@ export default class EmployeeRecordForm extends React.Component<IEmployeeRecordF
       this.setState ({hrsign:ItemInfo.HCOPSSIGN})
       this.setState({EmpTypeval:ItemInfo.EMPLOYMENTTYPE})
       this.setState({MyLocationKey:ItemInfo.LocationId})
+      this.setState({AttachmentFiles:ItemInfo.AttachmentFiles})
 
        //People Picker
 
@@ -326,6 +346,9 @@ export default class EmployeeRecordForm extends React.Component<IEmployeeRecordF
      this.setState({ bloodgroup: ItemInfo.BloodGroup })
      this.setState({emconnum:ItemInfo.EmergencyContactNumber})
      this.setState({empsign:ItemInfo.EMPSIGN})
+     this.setState({AttachmentFiles:ItemInfo.AttachmentFiles})
+     
+
      //END
 
      //HR
@@ -514,6 +537,13 @@ private async OnEmpClick()  {
    
   }
 
+  else if(this.state.emconnum.length>11)
+  {
+        
+  alert('The mobile number should not be more that 10');
+       
+   }
+
   else if(this.state.Empsignpeople==null || this.state.Empsignpeople=="")
   {
 
@@ -537,12 +567,20 @@ let FinalDateofJoin=month1+'/'+this.state.dtdoj.getDate() +'/' +year1;
 
     itemId.replace("",'');
 
+    let myfiles=[];
+
+    for(var count=0;count<this.state.FileValue.length;count++)
+    {
+            
+     myfiles.push(this.state.FileValue[count]);
+    }
+
 
   if(itemId==null || itemId =='')
    {
 
 
-  this._service.saveEmp(this.state.EmpName,FinalDateofJoin,this.state.EmpID,this.state.bloodgroup,this.state.emconnum,(this.state.Empsignpeople == null ? 0:this.state.Empsignpeople.Id)).then(function (data)
+  this._service.saveEmp(this.state.EmpName,FinalDateofJoin,this.state.EmpID,this.state.bloodgroup,this.state.emconnum,(this.state.Empsignpeople == null ? 0:this.state.Empsignpeople.Id),myfiles).then(function (data)
   {
 
     alert('Record submitted successfully');
@@ -561,7 +599,7 @@ else
     
   {
 
-  this._service.updateEmp(this.state.EmpName,FinalDateofJoin,this.state.EmpID,this.state.bloodgroup,this.state.emconnum,(this.state.Empsignpeople == null ? 0:this.state.Empsignpeople.Id),itemId).then(function (data)
+  this._service.updateEmp(this.state.EmpName,FinalDateofJoin,this.state.EmpID,this.state.bloodgroup,this.state.emconnum,(this.state.Empsignpeople == null ? 0:this.state.Empsignpeople.Id),itemId,myfiles,this.state.AttachmentFiles).then(function (data)
   {
 
     alert('Record updated successfully');
@@ -947,12 +985,7 @@ this._service.update_HRApproveorReject2(RecordId,this.state.ProjectName,this.sta
     
     }
 
-   else if(this.state.dtdeactive==null || this.state.dtdeactive=="")
-   {
-    alert('Please select date of deactivation');
-    
-   }
-
+  
 else if(this.state.AdminSignPeople==null || this.state.AdminSignPeople=="")
 {
 
@@ -1172,11 +1205,7 @@ this._service.update_AdminApproveorReject(this.state.EmpName,FinalDateofJoin,thi
     
    }
 
-   else if(this.state.dtdeactive==null || this.state.dtdeactive=="")
-   {
-    alert('Please select date of deactivation');
-    
-   }
+   
 
 else if(this.state.AdminSignPeople==null || this.state.AdminSignPeople=="")
 {
@@ -1360,6 +1389,56 @@ this._service.update_AdminApproveorReject(this.state.EmpName,FinalDateofJoin,thi
       //this.ppl.onChange([]);
   
     }
+
+    private changeFileupload(data: any) {
+
+      let LocalFileVal= this.state.FileValue;
+      
+       LocalFileVal.push(data.target.files[0]);
+      
+      
+      this.setState({FileValue:LocalFileVal});
+      
+      if(this.state.FileValue.length>=1)
+      {
+      this.setState({disableFileUpload:true});
+      
+      }
+      
+      
+      }
+
+      private _removeItemFromDetail(Item: any) {
+        console.log("itemId: " + Item.name); 
+      
+       let localFileValues=[];
+      
+       localFileValues=this.state.FileValue;
+      
+       if(localFileValues.length==1)
+       {
+      
+        localFileValues=[];
+       }
+      
+      
+        for(var count=0;count<localFileValues.length;count++)
+        {
+      
+          if(localFileValues[count].name==Item.name)
+            {
+              let Index=count;
+      
+              localFileValues.splice(Index,count);
+      
+            }
+      
+        }
+      
+        this.setState({FileValue:localFileValues,disableFileUpload:false});
+      
+      
+      }
 
     public async  _getPeoplePickerItems20(UserEmail:string) {
       
@@ -1758,8 +1837,29 @@ Surname) <label className={styles.redcolr}>*</label></label></b><br/>
         <b><label className={styles.labelsFonts}>5. EMERGENCY CONTACT NUM <label className={styles.redcolr}>*</label></label></b><br/>
         <div> 
   <input type="text" name="txtemgnum" value={this.state.emconnum} onChange={this.chnageemconnum.bind(this)} className={styles.boxsize} disabled={this.state.HRExists == true || this.state.AdminExsists==true?true :false }/>
-        
-        </div><br/><br></br><br></br>
+
+  </div><br></br>
+  <div>
+  <b><label className={styles.labelsFonts}>6.Please provide a headshot image</label></b><br></br>
+  <div> 
+  <br></br>
+  <input id="infringementFiles" type="file"  name="files[]"  onChange={this.changeFileupload.bind(this)} disabled={this.state.HRExists == true || this.state.AdminExsists==true || this.state.disableFileUpload==true?true :false }/>
+  </div>
+   <br></br>
+   {this.state.AttachmentFiles.length>0 && this.state.AttachmentFiles.map((item,index) =>( 
+    <div><a href={item.ServerRelativeUrl} target="_blank">{item.FileName} </a></div>
+   ))}
+
+  <br></br>
+  <p>File number limit: 1Single file size limit: 5MBAllowed file types: Jpeg,PNP</p>
+  {this.state.FileValue.map((item,index) =>(
+
+<div className={styles.padcss}>  
+{item.name} <Icon iconName='Delete'  onClick={(event) => {this._removeItemFromDetail(item)}}/>
+</div>
+ 
+))}
+</div><br/><br></br>
 
         <b><label className={styles.labelsFonts}>EMP SIGN <label className={styles.redcolr}>*</label></label></b><br/>
         <div className={styles.boxsize}> 
@@ -1956,7 +2056,7 @@ Surname) <label className={styles.redcolr}>*</label></label></b><br/>
           onChange={this.handlechangedtresign}/>  
           </div> <br/> 
 
-        <b><label className={styles.labelsFonts}>6. DATE OF DEACTIVATION <label className={styles.redcolr}>*</label></label></b><br/>
+        <b><label className={styles.labelsFonts}>6. DATE OF DEACTIVATION </label></b><br/>
         <div className={styles.datesize}> 
         <DateTimePicker  
           dateConvention={DateConvention.Date}  

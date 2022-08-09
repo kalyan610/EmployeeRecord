@@ -45,7 +45,7 @@ export default class Service {
         try {
 
     const selectedList = 'Employee Record';
-    const Item: any[] = await sp.web.lists.getByTitle(selectedList).items.select("*,CAPCO_x0020_EMAIL/EMail,PROJECTMANAGEREMAIL/EMail,EMPSIGN/EMail,HCOPSSIGN/EMail,ADMINSIGN/EMail").expand("CAPCO_x0020_EMAIL,PROJECTMANAGEREMAIL,EMPSIGN,HCOPSSIGN,ADMINSIGN").filter("ID eq '" + ItemID + "'").get();
+    const Item: any[] = await sp.web.lists.getByTitle(selectedList).items.select("*,CAPCO_x0020_EMAIL/EMail,PROJECTMANAGEREMAIL/EMail,EMPSIGN/EMail,HCOPSSIGN/EMail,ADMINSIGN/EMail,Attachments,AttachmentFiles").expand("CAPCO_x0020_EMAIL,PROJECTMANAGEREMAIL,EMPSIGN,HCOPSSIGN,ADMINSIGN,AttachmentFiles").filter("ID eq '" + ItemID + "'").get();
             return Item[0];
         } catch (error) {
             console.log(error);
@@ -125,13 +125,15 @@ export default class Service {
 
 
 
-      private async saveEmp(MyEmpName:string,MyDOJ:string,MyEmpId:string,Mybloodgroup:string,MyEmgnumber:string,MyEmpSign:string):Promise<any>     
+      private async saveEmp(MyEmpName:string,MyDOJ:string,MyEmpId:string,Mybloodgroup:string,MyEmgnumber:string,MyEmpSign:string,acceptedFiles):Promise<any>     
       {       
         
         
         let Myval='Completed';
 
         let MyListTitle='Employee Record';
+
+        let file=acceptedFiles;
 
         try
         {
@@ -151,6 +153,17 @@ export default class Service {
         
         
         }).then (async r => {
+
+            for(var count=0;count<file.length;count++)
+            {
+             await r.item.attachmentFiles.add(file[count].name, file[count]).then(result => {
+            console.log(result);
+            
+        
+              })
+        
+            }
+
           
         return Myval;
     
@@ -243,12 +256,17 @@ export default class Service {
 
     }
 
-    private async updateEmp(MyEmpName:string,MyDOJ:string,MyEmpId:string,Mybloodgroup:string,MyEmgnumber:string,MyEmpSign:string,MyRecordId:number)
+    private async updateEmp(MyEmpName:string,MyDOJ:string,MyEmpId:string,Mybloodgroup:string,MyEmgnumber:string,MyEmpSign:string,MyRecordId:number,acceptedFiles,MyFileName:any)
     {
 
         let Myval='Completed';
 
         let MyListTitle='Employee Record';
+
+        let file=acceptedFiles;
+
+        let DelFile=MyFileName[0].FileName;
+        
 
         try
         {
@@ -271,13 +289,27 @@ export default class Service {
         AdminStatus:'Pending'       
         
         
-        }).then (async r => {
-          
-        return Myval;
+    }).then (async r => {
+
+        for(var count=0;count<file.length;count++)
+        {
+         await r.item.attachmentFiles.getByName(DelFile).delete();
+         await r.item.attachmentFiles.add(file[count].name, file[count]).then(result => {
+        console.log(result);
+        
     
-        })
+          })
     
-       return Varmyval;
+        }
+
+      
+    return Myval;
+
+    })
+
+
+   return Varmyval;
+
             
       }
     
